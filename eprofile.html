@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="mn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entertainment Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        .content-card {
+            transition: transform 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #4267B2;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .rating {
+            color: #FFD700;
+        }
+
+        .comment-section {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-stats {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-link:hover .content-overlay {
+            opacity: 1;
+        }
+
+        .content-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: all 0.4s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Profile Header Section -->
+        <div class="bg-blue-500 rounded-lg shadow-lg mb-6 overflow-hidden">
+            <div class="p-4 sm:p-6 flex flex-col sm:flex-row items-center">
+                <div
+                    class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-white border-4 border-white mb-4 sm:mb-0 sm:mr-6">
+                    <img src="https://i.pravatar.cc/300?img=12" alt="Profile" class="w-full h-full object-cover"
+                        id="profile-image">
+                </div>
+                <div class="text-center sm:text-left flex-grow">
+                    <h1 class="text-white text-2xl sm:text-3xl font-bold mb-1">Бат-Эрдэнэ Ганбат</h1>
+                    <p class="text-blue-100 mb-2">Ном, Подкаст, Кино сонирхогч</p>
+                    <p class="text-blue-100 mb-3"><i class="fas fa-users mr-1"></i> <span id="friend-count">37</span>
+                        найз</p>
+                </div>
+                <div class="flex mt-4 sm:mt-0 space-x-2">
+                    <button id="qrcode-btn"
+                        class="bg-white text-blue-500 px-3 py-2 rounded-md font-medium flex items-center hover:bg-blue-50">
+                        <i class="fas fa-qrcode mr-2"></i> QR код
+                    </button>
+                    <button id="share-link-btn"
+                        class="bg-white text-blue-500 px-3 py-2 rounded-md font-medium flex items-center hover:bg-blue-50">
+                        <i class="fas fa-link mr-2"></i> Холбоос
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Modal -->
+        <div id="qrcode-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 modal">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Профайл QR Код</h3>
+                    <button id="close-qrcode-modal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex justify-center mb-4">
+                    <div id="qrcode-container"></div>
+                </div>
+                <p class="text-gray-600 text-center mb-4">Найз нэмэх QR кодыг скан хийнэ үү</p>
+            </div>
+        </div>
+
+        <!-- Share Link Modal -->
+        <div id="share-link-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 modal">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Профайл холбоос</h3>
+                    <button id="close-share-link-modal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <div class="flex">
+                        <input type="text" value="https://profile.entertainment.com/baterdene" id="profile-link"
+                            class="flex-grow border rounded-l-md py-2 px-3" readonly>
+                        <button id="copy-link-btn" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <p id="copy-message" class="text-green-500 text-center hidden">Холбоос хуулагдлаа!</p>
+            </div>
+        </div>
+
+        <!-- Bio Section -->
+        <div class="bg-white rounded-lg shadow-md mb-6 p-4 sm:p-6">
+            <div class="flex items-center mb-2">
+                <i class="fas fa-user-circle text-blue-500 mr-2"></i>
+                <h2 class="text-xl font-semibold">Миний тухай</h2>
+            </div>
+            <p class="text-gray-700">
+                Би бол шинэ санаа, мэдлэг, түүх олж авахын тулд ном уншиж, подкаст сонсдог дуртай хүн. Ялангуяа, бизнес,
+                шинжлэх ухаан, хөгжил дэвшил, философи зэрэг сэдвүүдэд сонирхолтой. Энэ профайлаар дамжуулан миний
+                дуртай болсон санал болгоох зүй бүтээлүүдээ бусадтай хуваалцах болно.
+            </p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-4">
+                <div class="text-3xl font-bold text-blue-600">125</div>
+                <div class="text-gray-500 uppercase text-sm font-medium">ном</div>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-4">
+                <div class="text-3xl font-bold text-blue-600">84</div>
+                <div class="text-gray-500 uppercase text-sm font-medium">подкаст</div>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-4">
+                <div class="text-3xl font-bold text-blue-600">237</div>
+                <div class="text-gray-500 uppercase text-sm font-medium">нийтлэл</div>
+            </div>
+        </div>
+
+        <!-- Content Navigation -->
+        <div class="flex overflow-x-auto mb-6 bg-white rounded-lg shadow-md p-1">
+            <button
+                class="content-nav-btn flex-1 py-2 px-3 rounded-md font-medium flex items-center justify-center bg-blue-500 text-white"
+                data-target="books">
+                <i class="fas fa-book mr-2"></i> Ном
+            </button>
+            <button
+                class="content-nav-btn flex-1 py-2 px-3 rounded-md font-medium flex items-center justify-center text-gray-700"
+                data-target="podcasts">
+                <i class="fas fa-microphone mr-2"></i> Подкаст
+            </button>
+            <button
+                class="content-nav-btn flex-1 py-2 px-3 rounded-md font-medium flex items-center justify-center text-gray-700"
+                data-target="movies">
+                <i class="fas fa-film mr-2"></i> Кино
+            </button>
+            <button
+                class="content-nav-btn flex-1 py-2 px-3 rounded-md font-medium flex items-center justify-center text-gray-700"
+                data-target="content">
+                <i class="fas fa-laptop mr-2"></i> Контент
+            </button>
+            <button
+                class="content-nav-btn flex-1 py-2 px-3 rounded-md font-medium flex items-center justify-center text-gray-700"
+                data-target="music">
+                <i class="fas fa-music mr-2"></i> Дуу
+            </button>
+        </div>
+
+        <!-- Featured Content Section -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Энэ сарын зориг</h2>
+                </div>
+                <button id="add-featured-content"
+                    class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Жагсаалт нэмэх
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Featured Book -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden content-card">
+                    <div class="bg-blue-100 text-blue-600 text-xs uppercase font-bold px-3 py-1">Бэст-Селлер</div>
+                    <div class="p-4">
+                        <a href="#" class="content-link block relative mb-3">
+                            <div class="relative h-48 rounded-lg overflow-hidden">
+                                <img src="https://m.media-amazon.com/images/I/71RveFwFLAL._AC_UF1000,1000_QL80_.jpg"
+                                    alt="Book" class="w-full h-full object-cover">
+                                <div class="content-overlay">
+                                    <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                                </div>
+                            </div>
+                        </a>
+                        <h3 class="font-bold text-lg mb-1">Атомын зуршил</h3>
+                        <p class="text-gray-600 text-sm mb-1">Жэймс Клиэр</p>
+                        <div class="rating mb-2">
+                            ★★★★☆ 4.5/5
+                        </div>
+                        <p class="text-gray-700 text-sm mb-4">
+                            Энэ ном нь хэрхэн сайн зуршил бий болгох, муу зуршил тасалж, хэвшиж, өөрчлөх арга замыг
+                            зааdag. Хүн хөгжил хэлбэржүүлэх буюу маш олон жижиг ахиц тогтмол хийхийг онцолсон.
+                        </p>
+                        <div class="flex mb-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">Хүн хүний
+                                хөгжил</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Зуршил</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <button class="text-blue-500 hover:text-blue-700 text-sm flex items-center comment-toggle">
+                                <i class="far fa-comment mr-1"></i> Сэтгэгдэл
+                            </button>
+                            <div class="flex items-center">
+                                <button class="text-gray-500 hover:text-gray-700 mr-2">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="far fa-share-square"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Compact Comment Section -->
+                        <div class="comment-section mt-2 hidden">
+                            <div class="border-t pt-2">
+                                <div class="flex mb-2">
+                                    <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                        <img src="https://i.pravatar.cc/100?img=3" alt="User"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="bg-gray-100 rounded-lg px-3 py-2 text-sm flex-grow">
+                                        <p class="font-medium">Дорж</p>
+                                        <p class="text-gray-700">Үнэхээр гайхалтай ном байна!</p>
+                                    </div>
+                                </div>
+
+                                <!-- Comment input area -->
+                                <div class="flex mt-2">
+                                    <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                        <img src="https://i.pravatar.cc/100?img=12" alt="Me"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-grow relative">
+                                        <input type="text" class="border rounded-full w-full py-1 px-3 text-sm"
+                                            placeholder="Сэтгэгдэл бичих...">
+                                        <div class="absolute right-0 top-0 h-full flex items-center pr-2">
+                                            <select class="text-xs text-gray-500 bg-transparent border-0">
+                                                <option>Хувийн</option>
+                                                <option>Найзууд</option>
+                                                <option>Нийтэд</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Podcast -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden content-card">
+                    <div class="bg-blue-100 text-blue-600 text-xs uppercase font-bold px-3 py-1">Бэст-Селлер</div>
+                    <div class="p-4">
+                        <a href="#" class="content-link block relative mb-3">
+                            <div class="relative h-48 rounded-lg overflow-hidden">
+                                <img src="https://m.media-amazon.com/images/I/51Uv+ZZnQzL.jpg" alt="Sapiens"
+                                    class="w-full h-full object-cover">
+                                <div class="content-overlay">
+                                    <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                                </div>
+                            </div>
+                        </a>
+                        <h3 class="font-bold text-lg mb-1">Сапиенс: Хүн төрөлхтний товч түүх</h3>
+                        <p class="text-gray-600 text-sm mb-1">Юваль Ноа Харари</p>
+                        <div class="rating mb-2">
+                            ★★★★★ 5/5
+                        </div>
+                        <p class="text-gray-700 text-sm mb-4">
+                            Хүн төрөлхтний хөгжил, соёл иргэншлийн түүхийг өгүүлсэн гайхалтай ном. Хүний төрөлхтний
+                            өнгөрсөн, одоо, ирээдүйг шинжлэх ойлголт хэрхүүлэгч.
+                        </p>
+                        <div class="flex mb-2">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mr-2">Түүх</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Шинжлэх ухаан</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <button class="text-blue-500 hover:text-blue-700 text-sm flex items-center comment-toggle">
+                                <i class="far fa-comment mr-1"></i> Сэтгэгдэл
+                            </button>
+                            <div class="flex items-center">
+                                <button class="text-gray-500 hover:text-gray-700 mr-2">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="far fa-share-square"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Compact Comment Section -->
+                        <div class="comment-section mt-2 hidden">
+                            <div class="border-t pt-2">
+                                <div class="flex mb-2">
+                                    <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                        <img src="https://i.pravatar.cc/100?img=5" alt="User"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="bg-gray-100 rounded-lg px-3 py-2 text-sm flex-grow">
+                                        <p class="font-medium">Болд Дорж</p>
+                                        <p class="text-gray-700">Хамгийн сайхалтай ном байна даа, надад бас ээлжид
+                                            байгаа!</p>
+                                    </div>
+                                </div>
+
+                                <!-- Comment input area -->
+                                <div class="flex mt-2">
+                                    <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                        <img src="https://i.pravatar.cc/100?img=12" alt="Me"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-grow relative">
+                                        <input type="text" class="border rounded-full w-full py-1 px-3 text-sm"
+                                            placeholder="Сэтгэгдэл бичих...">
+                                        <div class="absolute right-0 top-0 h-full flex items-center pr-2">
+                                            <select class="text-xs text-gray-500 bg-transparent border-0">
+                                                <option>Хувийн</option>
+                                                <option>Найзууд</option>
+                                                <option>Нийтэд</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Movie -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden content-card">
+                    <div class="bg-blue-100 text-blue-600 text-xs uppercase font-bold px-3 py-1">Бэст-Селлер</div>
+                    <div class="p-4">
+                        <a href="#" class="content-link block relative mb-3">
+                            <div class="relative h-48 rounded-lg overflow-hidden">
+                                <img src="https://s3-ap-southeast-1.amazonaws.com/schema-img/63fdd5a4-5319-11e8-9819-9fd7d4e7e72e.jpg"
+                                    alt="Book" class="w-full h-full object-cover">
+                                <div class="content-overlay">
+                                    <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                                </div>
+                            </div>
+                        </a>
+                        <h3 class="font-bold text-lg mb-1">Мөнгө удаалтын машин</h3>
+                        <p class="text-gray-600 text-sm mb-1">Тони Бьюдемис</p>
+                        <div class="rating mb-2">
+                            ★★★☆☆ 3.5/5
+                        </div>
+                        <p class="text-gray-700 text-sm mb-4">
+                            Олон үеийн мөнгө удаалтын механизм, авиагалын судалгаанд тулгуур өгүүлсэн судалгаа
+                            шинжилгээний бүтээл.
+                        </p>
+                        <div class="flex mb-2">
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Санхүү</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <button class="text-blue-500 hover:text-blue-700 text-sm flex items-center comment-toggle">
+                                <i class="far fa-comment mr-1"></i> Сэтгэгдэл
+                            </button>
+                            <div class="flex items-center">
+                                <button class="text-gray-500 hover:text-gray-700 mr-2">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="far fa-share-square"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Compact Comment Section -->
+                        <div class="comment-section mt-2 hidden">
+                            <div class="border-t pt-2">
+                                <!-- No comments yet message -->
+                                <p class="text-gray-500 text-sm text-center py-2">Сэтгэгдэл алга байна</p>
+
+                                <!-- Comment input area -->
+                                <div class="flex mt-2">
+                                    <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                        <img src="https://i.pravatar.cc/100?img=12" alt="Me"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-grow relative">
+                                        <input type="text" class="border rounded-full w-full py-1 px-3 text-sm"
+                                            placeholder="Сэтгэгдэл бичих...">
+                                        <div class="absolute right-0 top-0 h-full flex items-center pr-2">
+                                            <select class="text-xs text-gray-500 bg-transparent border-0">
+                                                <option>Хувийн</option>
+                                                <option>Найзууд</option>
+                                                <option>Нийтэд</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Books Section -->
+        <div id="books" class="content-section mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-book text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Миний номын сан</h2>
+                </div>
+                <button id="add-book" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Ном нэмэх
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                <!-- Book 1 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/71RveFwFLAL._AC_UF1000,1000_QL80_.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Атомын зуршил</h3>
+                        <p class="text-gray-600 text-xs">Жэймс Клиэр</p>
+                        <div class="rating text-xs">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Book 2 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/51Uv+ZZnQzL.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Сапиенс: Хүн төрөлхтний товч түүх</h3>
+                        <p class="text-gray-600 text-xs">Юваль Ноа Харари</p>
+                        <div class="rating text-xs">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Book 3 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://s3-ap-southeast-1.amazonaws.com/schema-img/63fdd5a4-5319-11e8-9819-9fd7d4e7e72e.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Мөнгө удаалтын машин</h3>
+                        <p class="text-gray-600 text-xs">Тони Бьюдемис</p>
+                        <div class="rating text-xs">★★★☆☆</div>
+                    </div>
+                </div>
+
+                <!-- Book 4 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/71rqjJEbKbL._AC_UF1000,1000_QL80_.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Тэрбум доллараар хүнвшаа</h3>
+                        <p class="text-gray-600 text-xs">Д.Жаргалсайхан</p>
+                        <div class="rating text-xs">★★★★☆</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second row of books -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <!-- Book 5 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/81RV8Ka1S2L._AC_UF1000,1000_QL80_.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Homo Deus</h3>
+                        <p class="text-gray-600 text-xs">Юваль Ноа Харари</p>
+                        <div class="rating text-xs">★★★★☆</div>
+                    </div>
+                </div>
+
+                <!-- Book 6 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/71zwWV5eYOL._AC_UF1000,1000_QL80_.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Эмэгтэй тоос</h3>
+                        <p class="text-gray-600 text-xs">Филип Пуллман</p>
+                        <div class="rating text-xs">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Book 7 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/71+v8lwVXvL._AC_UF1000,1000_QL80_.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Иргэний боловсрол</h3>
+                        <p class="text-gray-600 text-xs">Б.Батхүү</p>
+                        <div class="rating text-xs">★★★☆☆</div>
+                    </div>
+                </div>
+
+                <!-- Book 8 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-44 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/I/71oF3S-0JEL._AC_UF1000,1000_QL80_.jpg"
+                                class="w-full h-full object-cover" alt="Book">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1 truncate">Бүх хүмүүс бодох ойлт</h3>
+                        <p class="text-gray-600 text-xs">Ди.Ваттс</p>
+                        <div class="rating text-xs">★★★★★</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="text-blue-500 font-medium flex items-center mx-auto">
+                    <i class="fas fa-chevron-down mr-1"></i> Дэлгэрэнгүй харах
+                </button>
+            </div>
+        </div>
+
+        <!-- Podcasts Section -->
+        <div id="podcasts" class="content-section hidden mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-microphone text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Сонссон подкаст</h2>
+                </div>
+                <button id="add-podcast" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Подкаст нэмэх
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Podcast 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden p-4">
+                    <div class="flex space-x-4">
+                        <div class="w-16 h-16 rounded-lg bg-blue-100 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-podcast text-blue-500 text-2xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold mb-1">Амжилтын стратеги</h3>
+                            <p class="text-gray-600 text-sm mb-1">Бэнж Сэрэнсүрэн</p>
+                            <p class="text-gray-500 text-xs mb-2">Дугаар #42</p>
+
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 70%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>30:45</span>
+                                <span>45:12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Podcast 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden p-4">
+                    <div class="flex space-x-4">
+                        <div class="w-16 h-16 rounded-lg bg-green-100 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-podcast text-green-500 text-2xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold mb-1">Бизнесийн нууц</h3>
+                            <p class="text-gray-600 text-sm mb-1">Д.Жаргалсайхан</p>
+                            <p class="text-gray-500 text-xs mb-2">Дугаар #15</p>
+
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                                <div class="bg-green-500 h-1.5 rounded-full" style="width: 90%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>29:15</span>
+                                <span>32:18</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Podcast 3 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden p-4">
+                    <div class="flex space-x-4">
+                        <div class="w-16 h-16 rounded-lg bg-purple-100 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-podcast text-purple-500 text-2xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold mb-1">Шинжлэх ухаан & Технологи</h3>
+                            <p class="text-gray-600 text-sm mb-1">Цолмон I</p>
+                            <p class="text-gray-500 text-xs mb-2">Дугаар #7</p>
+
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                                <div class="bg-purple-500 h-1.5 rounded-full" style="width: 50%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>21:10</span>
+                                <span>43:22</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Podcast 4 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden p-4">
+                    <div class="flex space-x-4">
+                        <div class="w-16 h-16 rounded-lg bg-red-100 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-podcast text-red-500 text-2xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold mb-1">Түүхийн төөний</h3>
+                            <p class="text-gray-600 text-sm mb-1">Д.Ганбрямдан</p>
+                            <p class="text-gray-500 text-xs mb-2">Дугаар #24</p>
+
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                                <div class="bg-red-500 h-1.5 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>55:30</span>
+                                <span>61:05</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Articles Section -->
+        <div id="articles" class="content-section hidden mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-newspaper text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Нийтлэл</h2>
+                </div>
+                <button id="add-article" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Нийтлэл нэмэх
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Article 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2">Монголын хэлний засгийн төлөв: 2023-2024</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-3">
+                            <span class="mr-3">2023-11-10</span>
+                            <span class="flex items-center"><i class="far fa-eye mr-1"></i> 245</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            Энэ нийтлэлд Монголын хэлний засгийн өнөөгийн байдаж, хэлний төлөв, ирээх өөрчлөлт зэрэг
+                            талаар дурдсан.
+                        </p>
+                        <div class="flex mb-3">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full mr-2">Хэлний
+                                засаг</span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Судалгаа</span>
+                        </div>
+                        <a href="#" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                            <i class="fas fa-external-link-alt mr-1"></i> Унших
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Article 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2">Нийгмийн сүлжээний сэтгэцэд эрүүл мэндэд үзүүлэх нөлөө</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-3">
+                            <span class="mr-3">2023-10-25</span>
+                            <span class="flex items-center"><i class="far fa-eye mr-1"></i> 132</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            Энэхүү судалгаанд нийгмийн сүлжээний сэргэцэд эрүүл сэтгэцийн эрүүл мэндэд үзүүлэх нөлөөг
+                            шинээр тандсан.
+                        </p>
+                        <div class="flex mb-3">
+                            <span class="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full mr-2">Сэтгэц
+                                зүй</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Технологи</span>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                <img src="https://i.pravatar.cc/100?img=7" class="w-full h-full object-cover"
+                                    alt="Author">
+                            </div>
+                            <span class="text-sm text-gray-600">Тамир Г.</span>
+                            <div class="w-1 h-1 bg-gray-500 rounded-full mx-2"></div>
+                            <div class="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                <img src="https://i.pravatar.cc/100?img=4" class="w-full h-full object-cover"
+                                    alt="Source">
+                            </div>
+                            <span class="text-sm text-green-600">Нийтлэг</span>
+                        </div>
+                        <a href="#" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                            <i class="fas fa-external-link-alt mr-1"></i> Унших
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Article 3 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2">Шинэ үеийн технологийн өөрчлөлт</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-3">
+                            <span class="mr-3">2023-09-15</span>
+                            <span class="flex items-center"><i class="far fa-eye mr-1"></i> 315</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            AI, Machine Learning, BlockChain зэрэг технологиуд хүрээн боловсрол оюуны өвөрчилт болгах
+                            нэгэн нийтлэл.
+                        </p>
+                        <div class="flex mb-3">
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">Технологи</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Бизнес</span>
+                        </div>
+                        <a href="#" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                            <i class="fas fa-external-link-alt mr-1"></i> Унших
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movies Section -->
+        <div id="movies" class="content-section hidden mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-film text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Кино</h2>
+                </div>
+                <button id="add-movie" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Кино нэмэх
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <!-- Movie 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-48 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/M/MV5BNjM0NTc0NzItM2FlYS00YzEwLWE0YmUtNTA2ZWIzODc2OTgxXkEyXkFqcGdeQXVyNTgwNzIyNzg@._V1_FMjpg_UX1000_.jpg"
+                                class="w-full h-full object-cover" alt="Movie">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1">Харгалзагчийн галактик 2</h3>
+                        <p class="text-gray-600 text-xs">2017</p>
+                        <div class="rating text-xs">★★★★☆</div>
+                    </div>
+                </div>
+
+                <!-- Movie 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-48 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/M/MV5BMTYwOTEwNjAzMl5BMl5BanBnXkFtZTcwODc5MTUwMw@@._V1_.jpg"
+                                class="w-full h-full object-cover" alt="Movie">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1">Аватар</h3>
+                        <p class="text-gray-600 text-xs">2009</p>
+                        <div class="rating text-xs">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Movie 3 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-48 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg"
+                                class="w-full h-full object-cover" alt="Movie">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1">Эхлэл</h3>
+                        <p class="text-gray-600 text-xs">2010</p>
+                        <div class="rating text-xs">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Movie 4 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <a href="#" class="content-link block relative">
+                        <div class="h-48 bg-gray-200">
+                            <img src="https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg"
+                                class="w-full h-full object-cover" alt="Movie">
+                            <div class="content-overlay">
+                                <button class="bg-white text-blue-500 px-3 py-1 rounded-md">Үзэх</button>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm mb-1">Өшөө авагчид: Төгсгөл</h3>
+                        <p class="text-gray-600 text-xs">2019</p>
+                        <div class="rating text-xs">★★★★☆</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div id="content" class="content-section hidden mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-laptop text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Контент</h2>
+                </div>
+                <button id="add-content" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Контент нэмэх
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Content 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4">
+                        <div class="aspect-w-16 aspect-h-9 mb-3 rounded-lg overflow-hidden">
+                            <iframe src="https://www.youtube-nocookie.com/embed/jNQXAC9IVRw" frameborder="0"
+                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen class="w-full h-full object-cover"></iframe>
+                        </div>
+                        <h3 class="font-bold text-lg mb-1">Хэрхэн AI технологийг бизнестээ ашиглах вэ</h3>
+                        <p class="text-gray-600 text-sm mb-2">YouTube | TED Talk</p>
+                        <p class="text-gray-700 text-sm mb-3">
+                            Олон нийтийн өмнө хэлсэн AI технологийг практикт хэрхэн зөв ашиглах талаарх лекц.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="rating">★★★★★</div>
+                            <span class="text-gray-500 text-sm">15:25</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4">
+                        <div class="aspect-w-16 aspect-h-9 mb-3 rounded-lg overflow-hidden bg-gray-200">
+                            <img src="https://help.nflxext.com/0af6ce3e-b27a-4722-a5f0-e32af4df3045_what_is_netflix_5_en.png"
+                                class="w-full h-full object-cover" alt="Netflix">
+                        </div>
+                        <h3 class="font-bold text-lg mb-1">Нетфликс: Сошиал дилемма</h3>
+                        <p class="text-gray-600 text-sm mb-2">Netflix | Баримтат</p>
+                        <p class="text-gray-700 text-sm mb-3">
+                            Нийгмийн сүлжээний хэрэглэгчийн мэдээлэл, анхааралыг бизнес загвараа болгосон технологийн
+                            компаниудын нууц.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="rating">★★★★☆</div>
+                            <span class="text-gray-500 text-sm">1:34:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Section -->
+        <div id="music" class="content-section hidden mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-music text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Дуу</h2>
+                </div>
+                <button id="add-music" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Дуу нэмэх
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Song 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="flex p-3">
+                        <div class="w-12 h-12 rounded-md overflow-hidden mr-3">
+                            <img src="https://i.scdn.co/image/ab67616d0000b273b1c4b76e23414c9f20242268"
+                                class="w-full h-full object-cover" alt="Album">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-sm">Шувуунууд</h3>
+                            <p class="text-gray-600 text-xs">Нара (Хамтлаг)</p>
+                            <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                <div class="bg-blue-500 h-1 rounded-full" style="width: 65%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>2:15</span>
+                                <span>3:45</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button
+                                class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Song 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="flex p-3">
+                        <div class="w-12 h-12 rounded-md overflow-hidden mr-3">
+                            <img src="https://i.scdn.co/image/ab67616d0000b273ef0d4234e1a645740f77d59c"
+                                class="w-full h-full object-cover" alt="Album">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-sm">Монголын үүрд мөнх</h3>
+                            <p class="text-gray-600 text-xs">Д.Ариунбаатар</p>
+                            <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                <div class="bg-blue-500 h-1 rounded-full" style="width: 35%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>1:45</span>
+                                <span>4:50</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button
+                                class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Song 3 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="flex p-3">
+                        <div class="w-12 h-12 rounded-md overflow-hidden mr-3">
+                            <img src="https://i.scdn.co/image/ab67616d0000b273d8383e6d45cff547cc2bd0c7"
+                                class="w-full h-full object-cover" alt="Album">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-sm">Гэрлийн цацраг</h3>
+                            <p class="text-gray-600 text-xs">Б.Амархүү</p>
+                            <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                <div class="bg-blue-500 h-1 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>3:20</span>
+                                <span>4:05</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button
+                                class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Song 4 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="flex p-3">
+                        <div class="w-12 h-12 rounded-md overflow-hidden mr-3">
+                            <img src="https://i.scdn.co/image/ab67616d0000b2736b5e11ca1b6fbd812c81818a"
+                                class="w-full h-full object-cover" alt="Album">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-sm">Миний залуу нас</h3>
+                            <p class="text-gray-600 text-xs">Г.Ариунцэцэг</p>
+                            <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                <div class="bg-blue-500 h-1 rounded-full" style="width: 15%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0:45</span>
+                                <span>4:25</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button
+                                class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Friends Section -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-users text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-semibold">Найз нөхөд</h2>
+                </div>
+                <button id="add-friend" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center">
+                    <i class="fas fa-plus mr-1"></i> Найз нэмэх
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 sm:grid-cols-5 gap-4">
+                <!-- Friend 1 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden text-center p-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2">
+                        <img src="https://i.pravatar.cc/150?img=1" class="w-full h-full object-cover" alt="Friend">
+                    </div>
+                    <h3 class="font-medium text-sm mb-1">Батболд</h3>
+                    <p class="text-gray-500 text-xs">14 ном</p>
+                    <a href="#" class="text-blue-500 text-xs">Профайл үзэх</a>
+                </div>
+
+                <!-- Friend 2 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden text-center p-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2">
+                        <img src="https://i.pravatar.cc/150?img=5" class="w-full h-full object-cover" alt="Friend">
+                    </div>
+                    <h3 class="font-medium text-sm mb-1">Оюунтуяа</h3>
+                    <p class="text-gray-500 text-xs">27 ном</p>
+                    <a href="#" class="text-blue-500 text-xs">Профайл үзэх</a>
+                </div>
+
+                <!-- Friend 3 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden text-center p-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2">
+                        <img src="https://i.pravatar.cc/150?img=9" class="w-full h-full object-cover" alt="Friend">
+                    </div>
+                    <h3 class="font-medium text-sm mb-1">Наранбаатар</h3>
+                    <p class="text-gray-500 text-xs">7 ном</p>
+                    <a href="#" class="text-blue-500 text-xs">Профайл үзэх</a>
+                </div>
+
+                <!-- Friend 4 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden text-center p-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2">
+                        <img src="https://i.pravatar.cc/150?img=3" class="w-full h-full object-cover" alt="Friend">
+                    </div>
+                    <h3 class="font-medium text-sm mb-1">Саранцуа</h3>
+                    <p class="text-gray-500 text-xs">19 ном</p>
+                    <a href="#" class="text-blue-500 text-xs">Профайл үзэх</a>
+                </div>
+
+                <!-- Friend 5 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden text-center p-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2">
+                        <img src="https://i.pravatar.cc/150?img=8" class="w-full h-full object-cover" alt="Friend">
+                    </div>
+                    <h3 class="font-medium text-sm mb-1">Амгалан</h3>
+                    <p class="text-gray-500 text-xs">32 ном</p>
+                    <a href="#" class="text-blue-500 text-xs">Профайл үзэх</a>
+                </div>
+
+                <!-- Add Friend -->
+                <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-4">
+                    <button
+                        class="w-16 h-16 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center mb-2">
+                        <i class="fas fa-plus text-gray-500"></i>
+                    </button>
+                    <span class="text-gray-500 text-xs">Бүртгүүлэх хэрэгтэй</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Content Modal -->
+        <div id="add-content-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 modal">
+            <div class="bg-white rounded-lg p-6 max-w-lg w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Шинэ контент нэмэх</h3>
+                    <button class="close-modal text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Контентын төрөл</label>
+                    <select id="content-type" class="border rounded w-full py-2 px-3 text-gray-700">
+                        <option value="book">Ном</option>
+                        <option value="podcast">Подкаст</option>
+                        <option value="movie">Кино</option>
+                        <option value="content">Контент</option>
+                        <option value="music">Дуу</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Гарчиг</label>
+                    <input type="text" id="content-title" class="border rounded w-full py-2 px-3"
+                        placeholder="Гарчиг оруулах">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Зохиогч/Эх сурвалж</label>
+                    <input type="text" id="content-author" class="border rounded w-full py-2 px-3"
+                        placeholder="Зохиогч нэр эсвэл эх сурвалж">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Зураг/Дүрс холбоос (URL)</label>
+                    <input type="text" id="content-image" class="border rounded w-full py-2 px-3"
+                        placeholder="Зургийн URL оруулах">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Контентын холбоос (URL)</label>
+                    <input type="text" id="content-link" class="border rounded w-full py-2 px-3"
+                        placeholder="Контентын URL оруулах">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Үнэлгээ</label>
+                    <div class="flex">
+                        <i class="far fa-star text-yellow-400 text-xl mr-1 rating-star" data-value="1"></i>
+                        <i class="far fa-star text-yellow-400 text-xl mr-1 rating-star" data-value="2"></i>
+                        <i class="far fa-star text-yellow-400 text-xl mr-1 rating-star" data-value="3"></i>
+                        <i class="far fa-star text-yellow-400 text-xl mr-1 rating-star" data-value="4"></i>
+                        <i class="far fa-star text-yellow-400 text-xl rating-star" data-value="5"></i>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Таны тайлбар</label>
+                    <textarea id="content-comment" class="border rounded w-full py-2 px-3 h-24"
+                        placeholder="Контентын талаар таны сэтгэгдэл, тайлбар"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Нууцлалын түвшин</label>
+                    <select id="content-privacy" class="border rounded w-full py-2 px-3 text-gray-700">
+                        <option value="public">Нийтэд (бүгд харах)</option>
+                        <option value="friends">Найзууд (зөвхөн найзууд харах)</option>
+                        <option value="private">Хувийн (зөвхөн би харах)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md mr-2 close-modal">
+                        Цуцлах
+                    </button>
+                    <button id="save-content" class="bg-blue-500 text-white px-4 py-2 rounded-md">
+                        Хадгалах
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2023 Entertainment Profile. Бүх эрх хуулиар хамгаалагдсан.</p>
+            <div class="flex justify-center space-x-4 mt-2">
+                <a href="#" class="text-gray-500 hover:text-gray-700">Нууцлалын бодлого</a>
+                <a href="#" class="text-gray-500 hover:text-gray-700">Үйлчилгээний нөхцөл</a>
+                <a href="#" class="text-gray-500 hover:text-gray-700">Тусламж</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Random profile image
+        window.addEventListener('DOMContentLoaded', function () {
+            // Generate random number for profile image
+            const profileImgNum = Math.floor(Math.random() * 20) + 1;
+            document.getElementById('profile-image').src = `https://i.pravatar.cc/300?img=${profileImgNum}`;
+
+            // Initialize QR code
+            window.qrcode = qrcode(4, 'M');
+            qrcode.addData('https://profile.entertainment.com/baterdene');
+            qrcode.make();
+        });
+
+        // Navigation between content sections
+        document.querySelectorAll('.content-nav-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                // Remove active class from all buttons
+                document.querySelectorAll('.content-nav-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('text-gray-700');
+                });
+
+                // Add active class to clicked button
+                this.classList.remove('text-gray-700');
+                this.classList.add('bg-blue-500', 'text-white');
+
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.add('hidden');
+                });
+
+                // Show selected content section
+                const targetId = this.getAttribute('data-target');
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+
+        // Comment toggle
+        document.querySelectorAll('.comment-toggle').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentSection = this.closest('.content-card').querySelector('.comment-section');
+                commentSection.classList.toggle('hidden');
+            });
+        });
+
+        // QR Code Modal
+        document.getElementById('qrcode-btn').addEventListener('click', function () {
+            const modal = document.getElementById('qrcode-modal');
+            modal.classList.remove('hidden');
+
+            // Generate QR code
+            const qrcodeContainer = document.getElementById('qrcode-container');
+            qrcodeContainer.innerHTML = window.qrcode.createImgTag(4);
+        });
+
+        document.getElementById('close-qrcode-modal').addEventListener('click', function () {
+            document.getElementById('qrcode-modal').classList.add('hidden');
+        });
+
+        // Share Link Modal
+        document.getElementById('share-link-btn').addEventListener('click', function () {
+            document.getElementById('share-link-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('close-share-link-modal').addEventListener('click', function () {
+            document.getElementById('share-link-modal').classList.add('hidden');
+        });
+
+        // Copy link functionality
+        document.getElementById('copy-link-btn').addEventListener('click', function () {
+            const linkInput = document.getElementById('profile-link');
+            linkInput.select();
+            document.execCommand('copy');
+
+            // Show copied message
+            document.getElementById('copy-message').classList.remove('hidden');
+            setTimeout(function () {
+                document.getElementById('copy-message').classList.add('hidden');
+            }, 2000);
+        });
+
+        // Add Content Modal
+        document.querySelectorAll('#add-book, #add-podcast, #add-article, #add-movie, #add-content, #add-music, #add-featured-content').forEach(button => {
+            button.addEventListener('click', function () {
+                document.getElementById('add-content-modal').classList.remove('hidden');
+
+                // Set content type in dropdown based on which button was clicked
+                const contentType = this.id.replace('add-', '');
+                const contentTypeSelect = document.getElementById('content-type');
+
+                // Set the corresponding option
+                for (let i = 0; i < contentTypeSelect.options.length; i++) {
+                    if (contentTypeSelect.options[i].value === contentType) {
+                        contentTypeSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.close-modal').forEach(button => {
+            button.addEventListener('click', function () {
+                document.getElementById('add-content-modal').classList.add('hidden');
+            });
+        });
+
+        // Rating Stars
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('mouseover', function () {
+                const value = this.getAttribute('data-value');
+                highlightStars(value);
+            });
+
+            star.addEventListener('mouseout', function () {
+                resetStars();
+            });
+
+            star.addEventListener('click', function () {
+                const value = this.getAttribute('data-value');
+                document.querySelectorAll('.rating-star').forEach(s => {
+                    s.classList.remove('fas', 'selected');
+                    s.classList.add('far');
+                });
+
+                for (let i = 1; i <= value; i++) {
+                    const starToSelect = document.querySelector(`.rating-star[data-value="${i}"]`);
+                    starToSelect.classList.remove('far');
+                    starToSelect.classList.add('fas', 'selected');
+                }
+            });
+        });
+
+        function highlightStars(count) {
+            document.querySelectorAll('.rating-star').forEach(star => {
+                const value = star.getAttribute('data-value');
+                if (value <= count) {
+                    if (!star.classList.contains('selected')) {
+                        star.classList.remove('far');
+                        star.classList.add('fas');
+                    }
+                } else {
+                    if (!star.classList.contains('selected')) {
+                        star.classList.remove('fas');
+                        star.classList.add('far');
+                    }
+                }
+            });
+        }
+
+        function resetStars() {
+            document.querySelectorAll('.rating-star').forEach(star => {
+                if (!star.classList.contains('selected')) {
+                    star.classList.remove('fas');
+                    star.classList.add('far');
+                }
+            });
+        }
+
+        // Save content functionality
+        document.getElementById('save-content').addEventListener('click', function () {
+            const title = document.getElementById('content-title').value;
+            const author = document.getElementById('content-author').value;
+
+            if (title && author) {
+                // Simple validation
+                alert('Контент амжилттай нэмэгдлээ!');
+                document.getElementById('add-content-modal').classList.add('hidden');
+
+                // Reset form fields
+                document.getElementById('content-title').value = '';
+                document.getElementById('content-author').value = '';
+                document.getElementById('content-image').value = '';
+                document.getElementById('content-link').value = '';
+                document.getElementById('content-comment').value = '';
+                document.querySelectorAll('.rating-star').forEach(s => {
+                    s.classList.remove('fas', 'selected');
+                    s.classList.add('far');
+                });
+            } else {
+                alert('Гарчиг болон Зохиогч/Эх сурвалж заавал оруулна уу!');
+            }
+        });
+
+        // Random profile images for profile cards on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Make all content links work properly
+            document.querySelectorAll('.content-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    alert('Контент руу шилжиж байна...');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
